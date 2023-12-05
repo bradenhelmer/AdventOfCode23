@@ -1,4 +1,4 @@
-// Advent of Code 2023 Problem 1 - C++
+// Advent of Code 2023 Day 1 - C++
 // Braden Helmer
 #include <fstream>
 #include <iostream>
