@@ -51,59 +51,60 @@ void part1(SCRATCH_CARDS &scratchCards) {
 }
 
 void part2(SCRATCH_CARDS &scratchCards) {
-  std::map<int, int> copyTable;
-  // Populate copy table
+  std::map<int, int> winningNumsMap;
   for (int card = 0; card < scratchCards.size(); card++) {
-    copyTable[card + 1] = 1;
-  }
-  for (int card = 0; card < scratchCards.size(); card++) {
-    for (int copy = 1; copy <= copyTable[card + 1]; copy++) {
-      int multiplier = 0;
-      std::string trimmed =
-          scratchCards[card].substr(scratchCards[card].find(':') + 2);
-      int splitter = trimmed.find('|');
-      std::string winningNums = trimmed.substr(0, splitter),
-                  givenNums = trimmed.substr(splitter + 2);
+    int multiplier = 0;
+    std::string trimmed =
+        scratchCards[card].substr(scratchCards[card].find(':') + 2);
+    int splitter = trimmed.find('|');
+    std::string winningNums = trimmed.substr(0, splitter),
+                givenNums = trimmed.substr(splitter + 2);
 
-      // Create map for winning nums
-      std::map<std::string, int> wNums;
-      for (int curr = 0; curr < winningNums.size(); curr++) {
-        if (isdigit(winningNums[curr])) {
-          int start = curr;
-          do {
-            curr++;
-          } while (isdigit(winningNums[curr]));
-          std::string num(winningNums.begin() + start,
-                          winningNums.begin() + curr);
-          wNums[num] = 1;
-        }
-      }
-
-      // Check given nums
-      for (int curr = 0; curr < givenNums.size(); curr++) {
-        if (isdigit(givenNums[curr])) {
-          int start = curr;
-          do {
-            curr++;
-          } while (isdigit(givenNums[curr]));
-          std::string num(givenNums.begin() + start, givenNums.begin() + curr);
-          multiplier += (wNums.find(num) != wNums.end());
-        }
-      }
-
-      // Add copies
-      for (int copied = 1; copied <= multiplier; copied++) {
-        copyTable[card + copied + 1]++;
+    // Create map for winning nums
+    std::map<std::string, int> wNums;
+    for (int curr = 0; curr < winningNums.size(); curr++) {
+      if (isdigit(winningNums[curr])) {
+        int start = curr;
+        do {
+          curr++;
+        } while (isdigit(winningNums[curr]));
+        std::string num(winningNums.begin() + start,
+                        winningNums.begin() + curr);
+        wNums[num] = 1;
       }
     }
-  }
-  int totalCards =
-      std::accumulate(copyTable.begin(), copyTable.end(), 0,
-                      [](const int prev, const std::pair<int, int> &pair) {
-                        return prev + pair.second;
-                      });
 
-  std::printf("Part 2: %d\n", totalCards);
+    // Check given nums
+    for (int curr = 0; curr < givenNums.size(); curr++) {
+      if (isdigit(givenNums[curr])) {
+        int start = curr;
+        do {
+          curr++;
+        } while (isdigit(givenNums[curr]));
+        std::string num(givenNums.begin() + start, givenNums.begin() + curr);
+        multiplier += (wNums.find(num) != wNums.end());
+      }
+    }
+    winningNumsMap[card] = multiplier;
+  }
+
+  std::map<int, int> copyMap;
+  for (int i = 0; i < scratchCards.size(); i++) {
+    copyMap[i] = 1;
+  }
+
+  for (std::pair<int, int> p : winningNumsMap) {
+    for (int next = 1; next <= p.second; next++) {
+      copyMap[p.first + next] += copyMap[p.first];
+    }
+  }
+
+  int totalNums =
+      std::accumulate(copyMap.begin(), copyMap.end(), 0,
+                      [](const int prev, const std::pair<int, int> &p) {
+                        return prev + p.second;
+                      });
+  std::printf("Part 2: %d\n", totalNums);
 }
 
 int main(void) {
